@@ -3,7 +3,7 @@ require 'capistrano/bundle_rsync/base'
 class Capistrano::BundleRsync::Bundler < Capistrano::BundleRsync::Base
   def install
     Bundler.with_clean_env do
-      execute :bundle, "--gemfile #{config.local_release_path}/Gemfile --deployment --quiet --path #{config.local_bundle_path} --without development test"
+      execute :bundle, "--gemfile #{config.local_release_path}/Gemfile --deployment --quiet --path #{config.local_bundle_path} --without development test --binstubs=#{config.local_binstubs_path}"
     end
   end
 
@@ -32,6 +32,7 @@ BUNDLE_BIN: #{release_path.join('bin')}
       ssh = config.build_ssh_command(host)
       execute :rsync, "#{rsync_options} --rsh='#{ssh}' #{config.local_bundle_path}/ #{host}:#{shared_path}/bundle/"
       execute :rsync, "#{rsync_options} --rsh='#{ssh}' #{bundle_config_path} #{host}:#{release_path}/.bundle/config"
+      execute :rsync, "#{rsync_options} --rsh='#{ssh}' #{config.local_binstubs_path}/ #{host}:#{shared_path}/bin/"
     end
 
     # Do not remove if :bundle_rsync_local_release_path is directly specified.
